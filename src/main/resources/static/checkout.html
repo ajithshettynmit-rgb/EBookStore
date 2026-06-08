@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - E-Bookstore</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+        }
+
+        .navbar {
+            background: #333;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+
+        .navbar h1 {
+            font-size: 1.5rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .checkout-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+
+        .checkout-form {
+            background: white;
+            border-radius: 10px;
+            padding: 2rem;
+        }
+
+        .checkout-form h3 {
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+
+        .form-section {
+            margin-bottom: 2rem;
+        }
+
+        .form-section h4 {
+            margin-bottom: 1rem;
+            color: #666;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #666;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .payment-methods {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .payment-option {
+            border: 2px solid #e0e0e0;
+            padding: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .payment-option:hover {
+            border-color: #667eea;
+        }
+
+        .payment-option.selected {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .payment-option input[type="radio"] {
+            margin-right: 0.5rem;
+        }
+
+        .order-summary {
+            background: white;
+            border-radius: 10px;
+            padding: 2rem;
+            height: fit-content;
+            position: sticky;
+            top: 2rem;
+        }
+
+        .order-summary h3 {
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            color: #666;
+        }
+
+        .summary-row.total {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+            padding-top: 1rem;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+
+        .btn:hover {
+            background: #764ba2;
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .gift-points-section {
+            background: #f0f4ff;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+
+        .gift-points-section label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .success-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .success-modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 3rem;
+            border-radius: 10px;
+            text-align: center;
+            max-width: 500px;
+        }
+
+        .modal-content h2 {
+            color: #28a745;
+            margin-bottom: 1rem;
+        }
+
+        .modal-content p {
+            color: #666;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <h1>📚 E-Bookstore - Checkout</h1>
+    </nav>
+
+    <div class="container">
+        <div class="checkout-container">
+            <div class="checkout-form">
+                <h3>Checkout</h3>
+
+                <form id="checkoutForm">
+                    <!-- Delivery Address -->
+                    <div class="form-section">
+                        <h4>Delivery Address</h4>
+                        <div class="form-group">
+                            <label>Full Address *</label>
+                            <textarea id="deliveryAddress" required placeholder="Enter your complete delivery address"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Payment Method -->
+                    <div class="form-section">
+                        <h4>Payment Method</h4>
+                        <div class="payment-methods">
+                            <div class="payment-option selected" onclick="selectPayment('CREDIT_CARD')">
+                                <input type="radio" name="paymentMethod" value="CREDIT_CARD" checked>
+                                💳 Credit Card
+                            </div>
+                            <div class="payment-option" onclick="selectPayment('DEBIT_CARD')">
+                                <input type="radio" name="paymentMethod" value="DEBIT_CARD">
+                                💳 Debit Card
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gift Points -->
+                    <div class="form-section">
+                        <div class="gift-points-section">
+                            <h4>Use Gift Points</h4>
+                            <p>Available: <strong id="availablePoints">0</strong> points</p>
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="useGiftPoints" onchange="toggleGiftPoints()">
+                                    Use gift points for discount
+                                </label>
+                                <input type="number" id="giftPointsAmount" min="0" max="0" value="0" disabled 
+                                       placeholder="Enter points to use">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn" id="placeOrderBtn">Place Order</button>
+                </form>
+            </div>
+
+            <div class="order-summary" id="orderSummary">
+                <h3>Order Summary</h3>
+                <div id="summaryItems"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="success-modal" id="successModal">
+        <div class="modal-content">
+            <h2>✅ Order Placed Successfully!</h2>
+            <p>Your order has been confirmed. You will receive a confirmation email shortly.</p>
+            <p>Thank you for shopping with E-Bookstore!</p>
+            <button class="btn" onclick="goToOrders()">View My Orders</button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8080/api';
+        const user = JSON.parse(localStorage.getItem('user') || 'null');
+        let cart = null;
+
+        if (!user) {
+            window.location.href = 'login.html';
+        }
+
+        async function loadCheckoutData() {
+            try {
+                // Load cart
+                const cartResponse = await fetch(`${API_BASE_URL}/cart?userId=${user.id}`);
+                cart = await cartResponse.json();
+
+                if (!cart.items || cart.items.length === 0) {
+                    alert('Your cart is empty!');
+                    window.location.href = 'products.html';
+                    return;
+                }
+
+                // Load user data
+                const userResponse = await fetch(`${API_BASE_URL}/users/profile?userId=${user.id}`);
+                const userData = await userResponse.json();
+                
+                document.getElementById('availablePoints').textContent = userData.giftPoints || 0;
+                document.getElementById('giftPointsAmount').max = userData.giftPoints || 0;
+
+                displayOrderSummary();
+            } catch (error) {
+                alert('Error loading checkout data');
+            }
+        }
+
+        function displayOrderSummary() {
+            const summaryItems = document.getElementById('summaryItems');
+            const giftPoints = parseInt(document.getElementById('giftPointsAmount').value) || 0;
+            const discount = giftPoints;
+            const total = Math.max(0, cart.total - discount);
+
+            summaryItems.innerHTML = `
+                ${cart.items.map(item => `
+                    <div class="summary-item">
+                        <span>${item.product.title} x ${item.quantity}</span>
+                        <span>₹${item.subtotal.toFixed(2)}</span>
+                    </div>
+                `).join('')}
+                <div class="summary-row">
+                    <span>Subtotal</span>
+                    <span>₹${cart.total.toFixed(2)}</span>
+                </div>
+                <div class="summary-row">
+                    <span>Delivery</span>
+                    <span>Free</span>
+                </div>
+                ${giftPoints > 0 ? `
+                    <div class="summary-row" style="color: #28a745;">
+                        <span>Gift Points Discount</span>
+                        <span>-₹${discount.toFixed(2)}</span>
+                    </div>
+                ` : ''}
+                <div class="summary-row total">
+                    <span>Total</span>
+                    <span>₹${total.toFixed(2)}</span>
+                </div>
+            `;
+        }
+
+        function selectPayment(method) {
+            document.querySelectorAll('.payment-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+            document.querySelector(`input[value="${method}"]`).checked = true;
+        }
+
+        function toggleGiftPoints() {
+            const checkbox = document.getElementById('useGiftPoints');
+            const input = document.getElementById('giftPointsAmount');
+            input.disabled = !checkbox.checked;
+            if (!checkbox.checked) {
+                input.value = 0;
+            }
+            displayOrderSummary();
+        }
+
+        document.getElementById('giftPointsAmount').addEventListener('input', displayOrderSummary);
+
+        document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const deliveryAddress = document.getElementById('deliveryAddress').value;
+            const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+            const useGiftPoints = document.getElementById('useGiftPoints').checked;
+            const giftPointsAmount = useGiftPoints ? parseInt(document.getElementById('giftPointsAmount').value) || 0 : 0;
+
+            const placeOrderBtn = document.getElementById('placeOrderBtn');
+            placeOrderBtn.disabled = true;
+            placeOrderBtn.textContent = 'Processing...';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/orders?userId=${user.id}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        deliveryAddress,
+                        paymentMethod,
+                        useGiftPoints: giftPointsAmount
+                    })
+                });
+
+                if (response.ok) {
+                    const order = await response.json();
+                    
+                    // Update user data in localStorage
+                    const userResponse = await fetch(`${API_BASE_URL}/users/profile?userId=${user.id}`);
+                    const updatedUser = await userResponse.json();
+                    localStorage.setItem('user', JSON.stringify(updatedUser));
+
+                    // Show success modal
+                    document.getElementById('successModal').classList.add('show');
+                } else {
+                    alert('Error placing order');
+                    placeOrderBtn.disabled = false;
+                    placeOrderBtn.textContent = 'Place Order';
+                }
+            } catch (error) {
+                alert('Network error');
+                placeOrderBtn.disabled = false;
+                placeOrderBtn.textContent = 'Place Order';
+            }
+        });
+
+        function goToOrders() {
+            window.location.href = 'orders.html';
+        }
+
+        loadCheckoutData();
+    </script>
+</body>
+</html>
